@@ -38,26 +38,7 @@ function App() {
     fetchUsers();
   }, []);
 
-//   const handleSave = async (data: User) => {
-//   try {
-//     setLoading(true);
 
-//     if (selectedUser?.id) {
-//       await updateUser(selectedUser.id, data);
-//       toast.success("User updated");
-//     } else {
-//       await createUser(data);
-//       toast.success("User created");
-//     }
-
-//     setSelectedUser(null);
-//     setClearForm(prev => !prev); 
-//     fetchUsers();
-
-//   } finally {
-//     setLoading(false);
-//   }
-// };
 const handleSave = async (data: User) => {
   try {
     setLoading(true);
