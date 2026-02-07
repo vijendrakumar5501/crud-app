@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import UserForm from "./components/UserForm";
 import UserList from "./components/UserList";
+import Spinner from "./components/Spinner";
 import  type { User } from "./models/User";
 import {
   getUsers,
@@ -9,67 +11,100 @@ import {
   deleteUser,
 } from "./services/userService";
 
+
 function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Fetch all users
+  const [clearForm, setClearForm] = useState(false);
+
+
+
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const res = await getUsers();
       setUsers(res.data);
-    } catch (err) {
-      console.error("Error fetching users", err);
+    } catch (error: unknown) {
+      toast.error("Failed to load users");
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial load
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Create or Update
-  const handleSubmit = async (data: User) => {
-    try {
-      setLoading(true);
+//   const handleSave = async (data: User) => {
+//   try {
+//     setLoading(true);
 
-      if (selectedUser?.id) {
-        await updateUser(selectedUser.id, data);
-        setSelectedUser(null);
-      } else {
-        await createUser(data);
-      }
+//     if (selectedUser?.id) {
+//       await updateUser(selectedUser.id, data);
+//       toast.success("User updated");
+//     } else {
+//       await createUser(data);
+//       toast.success("User created");
+//     }
 
-      fetchUsers();
-    } catch (err) {
-      console.error("Save failed", err);
-    } finally {
-      setLoading(false);
+//     setSelectedUser(null);
+//     setClearForm(prev => !prev); 
+//     fetchUsers();
+
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+const handleSave = async (data: User) => {
+  try {
+    setLoading(true);
+
+    const emailExists = users.some(
+      user =>
+        user.email?.toLowerCase() === data.email?.toLowerCase() &&
+        user.id !== selectedUser?.id
+    );
+
+    if (emailExists) {
+      toast.error("Email already exists");
+      return;
     }
-  };
 
-  // Delete user
+    if (selectedUser?.id) {
+      await updateUser(selectedUser.id, data);
+      toast.success("User updated");
+    } else {
+      await createUser(data);
+      toast.success("User created");
+    }
+
+    setSelectedUser(null);
+    setClearForm(prev => !prev);
+    fetchUsers();
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Delete this user?")) return;
+    if (!confirm("Delete this user?")) return;
 
     try {
       setLoading(true);
       await deleteUser(id);
+      toast.success("User deleted");
       fetchUsers();
-    } catch (err) {
-      console.error("Delete failed", err);
+    } catch {
+      toast.error("Delete failed");
     } finally {
       setLoading(false);
     }
-  };
-
-  // Edit user
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
   };
 
   return (
@@ -77,21 +112,22 @@ function App() {
       <div className="max-w-5xl mx-auto space-y-6">
 
         <h1 className="text-3xl font-bold text-center">
-          User CRUD (React + TS + Tailwind)
+          User Management
         </h1>
 
-        <UserForm
-          onSubmit={handleSubmit}
-          selectedUser={selectedUser}
-        />
+     <UserForm
+  onSubmit={handleSave}
+  selectedUser={selectedUser}
+  clearForm={clearForm}
+/>
 
-        {loading && (
-          <p className="text-center text-gray-500">Loading...</p>
-        )}
+
+
+        {loading && <Spinner />}
 
         <UserList
           users={users}
-          onEdit={handleEdit}
+          onEdit={setSelectedUser}
           onDelete={handleDelete}
         />
 
