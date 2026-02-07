@@ -3,6 +3,9 @@ import type { User } from "../models/User";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+console.log("ENV:", import.meta.env.VITE_API_URL);
+
+
 export const getUsers = () =>
   axios.get<User[]>(`${BASE_URL}/users`);
 
