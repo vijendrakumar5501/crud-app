@@ -1,15 +1,16 @@
 import axios from "axios";
-import type  { User } from "../models/User";
+import type { User } from "../models/User";
 
-const API = "http://localhost:3000/users";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
-export const getUsers = () => axios.get<User[]>(API);
+export const getUsers = () =>
+  axios.get<User[]>(`${BASE_URL}/users`);
 
 export const createUser = (data: User) =>
-  axios.post(API, data);
+  axios.post(`${BASE_URL}/users`, data);
 
 export const updateUser = (id: number, data: User) =>
-  axios.put(`${API}/${id}`, data);
+  axios.put(`${BASE_URL}/users/${id}`, data);
 
 export const deleteUser = (id: number) =>
-  axios.delete(`${API}/${id}`);
+  axios.delete(`${BASE_URL}/users/${id}`);
